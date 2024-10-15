@@ -1,7 +1,12 @@
 sudo: required
 services:
   - docker
-before_install:
-  - docker build -t benaroh30/client Dockerfile
+
 script:
   - docker run -e CI=true benaroh30/client npm test -- --coverage
+
+after_success:
+  #build production dockerfile
+  - docker build -t benaroh30/client .
+  - echo "$Docker_password" | docker login --username "$Docker_id" --password-stdin
+  - docker push benaroh30/client
