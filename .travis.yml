@@ -2,8 +2,8 @@ sudo: required
 services:
   - docker
 
-# script:
-#   - docker run -e CI=true benaroh30/client npm test -- --coverage
+script:
+  - docker run -e CI=true benaroh30/client npm test -- --coverage
 after_success:
   - openssl enc -aes256 -d -in serviceAccount.json.enc -out serviceAccount.json -k $SERVICE_KEY
   # Install GCP sdk deleting old versions
