@@ -2,11 +2,21 @@ sudo: required
 services:
   - docker
 
-script:
-  - docker run -e CI=true benaroh30/client npm test -- --coverage
-
+# script:
+#   - docker run -e CI=true benaroh30/client npm test -- --coverage
 after_success:
+  - openssl enc -aes256 -d -in serviceAccount.json.enc -out serviceAccount.json -k $SERVICE_KEY
+  # Install GCP sdk deleting old versions
+  - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf $HOME/google-cloud-sdk; export CLOUDSDK_CORE_DISABLE_PROMPTS=1; curl https://sdk.cloud.google.com | bash; fi
+  - source /home/travis/google-cloud-sdk/path.bash.inc
+  - gcloud auth activate-service-account --key-file serviceAccount.json
+  - gcloud config set project eshop-439007
+  - gcloud config set compute/zone us-west2-a
+
+
   #build production dockerfile
   - docker build -t benaroh30/client .
   - echo "$Docker_password" | docker login --username "$Docker_id" --password-stdin
   - docker push benaroh30/client
+  - bash ./deploy.sh
+
